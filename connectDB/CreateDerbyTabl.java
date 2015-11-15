@@ -95,22 +95,6 @@ public class CreateDerbyTabl {
         dataSource.takeConnect(con);
     }
 
-//    public void setStartParam() {
-//
-//        try {
-//            String start = "SELECT MAX (id) AS id FROM customer";
-//            Statement s = dataSource.getConnections().createStatement();
-//            s.execute(start);
-//            ResultSet rs = s.getResultSet();
-//            while (rs.next()) {
-//                System.out.println(rs.getInt("id"));
-//            }
-//
-//        } catch (SQLException e) {
-//            System.out.println("--------------------");
-//        }
-//    }
-
     public void clear() {
         Connection con = dataSource.getConnections();
         Statement st = null;
