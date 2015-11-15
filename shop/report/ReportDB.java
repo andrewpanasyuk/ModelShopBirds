@@ -1,6 +1,6 @@
 package shop.report;
 
-import connectDB.DBWorker;
+import connectDB.DataSource;
 import shop.stock.StockShop;
 import shop.transaction.TransactionShop;
 import java.sql.Connection;
@@ -15,27 +15,26 @@ import java.util.Set;
  * Created by panasyuk on 04.11.2015.
  */
 public class ReportDB extends ReportsShop {
-    private DBWorker dbWorker;
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
     private TransactionShop transactionShop;
     private StockShop stockShop;
     private Connection connection;
+    private DataSource dataSource;
 
 
-    public ReportDB(DBWorker dbWorker, TransactionShop transactionShop, StockShop stockShop) {
-        this.dbWorker = dbWorker;
-        this.connection = dbWorker.getConnection();
+    public ReportDB(DataSource dataSource, TransactionShop transactionShop, StockShop stockShop) {
+        this.dataSource = dataSource;
         this.transactionShop = transactionShop;
         this.stockShop = stockShop;
     }
 
+
     @Override
     public void selectCustomerAccordingProduct(String name_prodact) {
-        connection = dbWorker.getConnection();
+        connection = dataSource.getConnections();
         HashSet<String> nameCustomers = new HashSet<>();
         whoBuysBirds(nameCustomers, name_prodact, connection);
-        Set<String> a = new HashSet<>();
 
 
         setListReportNameCustomer(new Object[4][nameCustomers.size() + 1]);
@@ -67,6 +66,7 @@ public class ReportDB extends ReportsShop {
                 }
                 listReportNameCustomer[2][n] = qnt;
                 listReportNameCustomer[3][n] = qnt * price;
+                preparedStatement.close();
                 n++;
             }
 
@@ -74,7 +74,7 @@ public class ReportDB extends ReportsShop {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        //dbWorker.putConnect(connection);
+        dataSource.takeConnect(connection);
     }
 
     @Override
@@ -92,6 +92,7 @@ public class ReportDB extends ReportsShop {
             while (resultSet.next()) {
                 nameCustomers.add(resultSet.getString("name"));
             }
+            preparedStatement.close();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -100,7 +101,7 @@ public class ReportDB extends ReportsShop {
 
     @Override
     public void selectProductsAccordingCustomer(String name_customer) {
-        connection = dbWorker.getConnection();
+        connection = dataSource.getConnections();
         setListReportNameCustomer(new Object[4][2]);
         listReportNameCustomer[0][0] = "#";
         listReportNameCustomer[1][0] = "Name Customer";
@@ -145,7 +146,7 @@ public class ReportDB extends ReportsShop {
         listReportNameCustomer[3][1] = money;
 
 
-        //dbWorker.putConnect(connection);
+        dataSource.takeConnect(connection);
     }
 
 }

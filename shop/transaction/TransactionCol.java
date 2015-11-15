@@ -35,6 +35,7 @@ this.stockShop=stockShop;
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yy HH:mm");
         String dataTxt = sdf.format(date);
+
         getTransactionShopList().add(new TransactionShop(getIdTransaction()+1, dataTxt, name_customer, name_bird, qnt));
         return 1;
     }

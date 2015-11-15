@@ -135,7 +135,7 @@ public class ShopPanel {
         updatePositionOnStock_Qty.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                clearFrame(updateInformationPanel("qnt."));
+                clearFrame(updateInformationPanel("qnt"));
             }
         });
         JMenuItem updatePositionOnStock_Price = new JMenuItem("Setup NEW price");
@@ -143,7 +143,7 @@ public class ShopPanel {
         updatePositionOnStock_Price.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                clearFrame(updateInformationPanel("price_product"));
+                clearFrame(updateInformationPanel("price_prodact"));
             }
         });
         menuBar.add(menuStock);

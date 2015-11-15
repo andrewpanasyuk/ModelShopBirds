@@ -1,31 +1,31 @@
 package shop.transaction;
 
-import com.mysql.jdbc.*;
-import connectDB.DBWorker;
-
+import connectDB.DataSource;
 import java.sql.*;
 import java.sql.CallableStatement;
-import java.sql.Date;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import java.util.*;
 
 /**
  * Created by panasyuk on 02.11.2015.
  */
 public class TransactionDb extends TransactionShop {
-    private DBWorker dbWorker;
     private PreparedStatement ps;
     private ResultSet resultSet;
     private CallableStatement cs;
+    private DataSource dataSource;
+    private Connection connection;
 
-    public TransactionDb(DBWorker dbWorker) {
-        this.dbWorker = dbWorker;
+
+    public TransactionDb(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
     public int createTransaction(String name_customer, String name_bird, int qnt) {
+        connection = dataSource.getConnections();
         int numberTr = lastID();
         int totalProdOnStock = controlStock(name_bird, qnt);
         int idCustomer = getIdCustomer(name_customer);
@@ -34,7 +34,7 @@ public class TransactionDb extends TransactionShop {
         }
         String newTransaction = "INSERT INTO transactions (id_transaction, fk_customer_id, qnt_birds) VALUES (?, ?, ?)";
         try {
-            cs = dbWorker.getConnection().prepareCall(newTransaction);
+            cs = connection.prepareCall(newTransaction);
             cs.setInt(1, numberTr);
             cs.setInt(2, idCustomer);
             cs.setInt(3, qnt);
@@ -47,7 +47,7 @@ public class TransactionDb extends TransactionShop {
             e.printStackTrace();
         }
 
-
+        dataSource.takeConnect(connection);
         return 1;
     }
 
@@ -56,12 +56,11 @@ public class TransactionDb extends TransactionShop {
         String start = "SELECT MAX(id_transaction) AS id_transaction FROM transactions";
         Statement s = null;
         try {
-            s = dbWorker.getConnection().createStatement();
+            s = connection.createStatement();
             s.execute(start);
             ResultSet rs = s.getResultSet();
             while (rs.next()) {
                 lastID = rs.getInt("id_transaction");
-                System.out.println(rs.getInt("id_transaction") + " *-*--*-*-*");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -75,13 +74,13 @@ public class TransactionDb extends TransactionShop {
         String idProd = "SELECT id_prodact FROM stock_shop WHERE name_prodact = ?";
         int prodID = 0;
         try {
-            cs = dbWorker.getConnection().prepareCall(update);
+            cs = connection.prepareCall(update);
             cs.setInt(1, rezult);
             cs.setString(2, name_bird);
             cs.execute();
             cs.close();
 
-            cs = dbWorker.getConnection().prepareCall(idProd);
+            cs = connection.prepareCall(idProd);
             cs.setString(1, name_bird);
             cs.execute();
             resultSet = cs.getResultSet();
@@ -98,7 +97,7 @@ public class TransactionDb extends TransactionShop {
     public void createST(int transaction, int prod) {
         String update = "INSERT INTO secondary_transaction (fk_transaction_id, fk_podact_id) VALUES (?, ?)";
         try {
-            cs = dbWorker.getConnection().prepareCall(update);
+            cs = connection.prepareCall(update);
             cs.setInt(1, transaction);
             cs.setInt(2, prod);
             cs.execute();
@@ -110,7 +109,7 @@ public class TransactionDb extends TransactionShop {
     public int getIdCustomer(String name_customer) {
         String howManyBirdOnStock = "SELECT id FROM customer WHERE name = ?";
         try {
-            cs = dbWorker.getConnection().prepareCall(howManyBirdOnStock);
+            cs = connection.prepareCall(howManyBirdOnStock);
             cs.setString(1, name_customer);
             cs.execute();
             ResultSet resultSet = cs.getResultSet();
@@ -120,14 +119,13 @@ public class TransactionDb extends TransactionShop {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return 0;
     }
 
     public int controlStock(String name_bird, int qnt) {
         String howManyBirdOnStock = "SELECT qnt FROM stock_shop WHERE name_prodact = ?";
         try {
-            cs = dbWorker.getConnection().prepareCall(howManyBirdOnStock);
+            cs = connection.prepareCall(howManyBirdOnStock);
             cs.setString(1, name_bird);
             cs.execute();
             ResultSet resultSet = cs.getResultSet();
@@ -146,23 +144,20 @@ public class TransactionDb extends TransactionShop {
 
     @Override
     public void takeAllTransaction() {
+        connection = dataSource.getConnections();
         getTransactionShopList().clear();
         String allTransaction = "SELECT * from customer JOIN transactions on (transactions.fk_customer_id = customer.id) JOIN secondary_transaction on (transactions.id_transaction = secondary_transaction.fk_transaction_id) JOIN stock_shop on (secondary_transaction.fk_podact_id = stock_shop.id_prodact)";
         try {
-            Statement st = dbWorker.getConnection().createStatement();
+            Statement st = connection.createStatement();
             st.execute(allTransaction);
             resultSet = st.getResultSet();
             int i = 0;
             while (resultSet.next()) {
-                System.out.println(i + " ++");
                 int id = resultSet.getInt("id_transaction");
-
-                java.util.Date data = resultSet.getDate("data");
                 SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yy HH:mm ");
+                Timestamp data = resultSet.getTimestamp("data");
                 String text = sdf.format(data);
-
                 String name_customer = resultSet.getString("name");
-
                 String name_bird = resultSet.getString("name_prodact");
                 int qnt = resultSet.getInt("qnt_birds");
                 getTransactionShopList().add(new TransactionShop(id, text, name_customer, name_bird, qnt));
@@ -171,6 +166,7 @@ public class TransactionDb extends TransactionShop {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        dataSource.takeConnect(connection);
     }
 
 

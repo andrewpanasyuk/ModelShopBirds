@@ -1,53 +1,41 @@
 package shop;
 
-import connectDB.CreateDerbyTabl;
-import connectDB.DBWorker;
-import shop.customer.CustomerDB;
-import shop.customer.CustomerL;
-import shop.customer.CustomerShop;
-import shop.report.ReportC;
-import shop.report.ReportDB;
-import shop.report.ReportsShop;
-import shop.stock.StockDB;
-import shop.stock.StockCol;
-import shop.stock.StockShop;
-import shop.transaction.TransactionCol;
-import shop.transaction.TransactionDb;
-import shop.transaction.TransactionShop;
+import connectDB.*;
+import shop.customer.*;
+import shop.report.*;
+import shop.stock.*;
+import shop.transaction.*;
 
 
 /**
  * Created by panasyuk on 01.11.2015.
  */
 public class Shop {
-    private DBWorker bdw;
     private StockShop stock;
     private CustomerShop customers;
     private TransactionShop transactionShop;
     private ReportsShop reportsShop;
 
     public Shop() {
-        bdw = new DBWorker("jdbc:mysql://localhost:3306/birdsshop");
-        stock = new StockDB(bdw);
-        customers = new CustomerDB(bdw);
-        transactionShop = new TransactionDb(bdw);
-        reportsShop = new ReportDB(bdw, transactionShop, stock);
+        DataSource dataSource = new DataSource("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/birdsshop");
+        stock = new StockDB(dataSource);
+        customers = new CustomerDB(dataSource);
+        transactionShop = new TransactionDb(dataSource);
+        reportsShop = new ReportDB(dataSource, transactionShop, stock);
 
     }
     public Shop(String i) {
-
-        bdw = new DBWorker("jdbc:derby:birdsshop;create=true");
-        CreateDerbyTabl derbyTabl = new CreateDerbyTabl(bdw);
+        DataSource dataSource = new DataSource("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:berdsshop;create=true");
+        CreateDerbyTabl derbyTabl = new CreateDerbyTabl(dataSource);
             if (i  == "clear") {
                 derbyTabl.clear();
-
             } else {
                 derbyTabl.CreateTabl();
             }
-        stock = new StockDB(bdw);
-        customers = new CustomerDB(bdw);
-        transactionShop = new TransactionDb(bdw);
-        reportsShop = new ReportDB(bdw, transactionShop, stock);
+        stock = new StockDB(dataSource);
+        customers = new CustomerDB(dataSource);
+        transactionShop = new TransactionDb(dataSource);
+        reportsShop = new ReportDB(dataSource, transactionShop, stock);
     }
 
     public Shop(int i) {

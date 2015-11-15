@@ -6,14 +6,14 @@ import java.sql.*;
  * Created by panasyuk on 09.11.2015.
  */
 public class CreateDerbyTabl {
-    private DBWorker dbWorker;
+    private DataSource dataSource;
 
-    public CreateDerbyTabl(DBWorker dbWorker) {
-        this.dbWorker = dbWorker;
+    public CreateDerbyTabl(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public void CreateTabl() {
-        Connection con = dbWorker.getConnection();
+        Connection con = dataSource.getConnections();
         Statement st = null;
 
         // 1
@@ -21,6 +21,7 @@ public class CreateDerbyTabl {
             st = con.createStatement();
             String createCustomerTable = "CREATE TABLE customer (id INT NOT NULL , name VARCHAR(30) NOT NULL, PRIMARY KEY(id))";
             st.executeUpdate(createCustomerTable);
+            st.close();
 
             System.out.println("Table CUSTOMER creation process successfully!");
         } catch (SQLException e) {
@@ -28,10 +29,10 @@ public class CreateDerbyTabl {
             String start = "SELECT MAX (id) AS id FROM customer";
             Statement s = null;
             try {
-                s = dbWorker.getConnection().createStatement();
+                s = con.createStatement();
                 s.execute(start);
                 ResultSet rs = s.getResultSet();
-                while (rs.next()){
+                while (rs.next()) {
                     System.out.println(rs.getInt("id"));
                 }
 
@@ -44,6 +45,7 @@ public class CreateDerbyTabl {
             st = con.createStatement();
             String createTransactionTable = "CREATE TABLE transactions (id_transaction INT NOT NULL, fk_customer_id INT NOT NULL, data TIMESTAMP DEFAULT CURRENT_TIMESTAMP, qnt_birds INT NOT NULL, PRIMARY KEY(id_transaction))";
             st.executeUpdate(createTransactionTable);
+            st.close();
             System.out.println("Table TRANSACTION creation process successfully!");
         } catch (SQLException e) {
 
@@ -61,6 +63,7 @@ public class CreateDerbyTabl {
 
             String createStockTable = "CREATE TABLE stock_shop (id_prodact INT NOT NULL, name_prodact VARCHAR(30), qnt INT, price_prodact DOUBLE, PRIMARY KEY(id_prodact))";
             st.executeUpdate(createStockTable);
+            st.close();
             System.out.println("Table STOCK creation process successfully!");
         } catch (SQLException e) {
             System.out.println("Table STOCK all ready exists!");
@@ -89,27 +92,27 @@ public class CreateDerbyTabl {
             }
         }
 //         --
-
+        dataSource.takeConnect(con);
     }
 
-    public void setStartParam() {
-
-        try {
-            String start = "SELECT MAX (id) AS id FROM customer";
-            Statement s = dbWorker.getConnection().createStatement();
-            s.execute(start);
-            ResultSet rs = s.getResultSet();
-            while (rs.next()){
-                System.out.println(rs.getInt("id"));
-            }
-
-        } catch (SQLException e) {
-            System.out.println("--------------------");
-        }
-    }
+//    public void setStartParam() {
+//
+//        try {
+//            String start = "SELECT MAX (id) AS id FROM customer";
+//            Statement s = dataSource.getConnections().createStatement();
+//            s.execute(start);
+//            ResultSet rs = s.getResultSet();
+//            while (rs.next()) {
+//                System.out.println(rs.getInt("id"));
+//            }
+//
+//        } catch (SQLException e) {
+//            System.out.println("--------------------");
+//        }
+//    }
 
     public void clear() {
-        Connection con = dbWorker.getConnection();
+        Connection con = dataSource.getConnections();
         Statement st = null;
 
         try {

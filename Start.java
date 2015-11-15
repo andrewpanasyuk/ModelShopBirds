@@ -1,4 +1,5 @@
 import gui.ShopPanel;
+import shop.Shop;
 
 /**
  * Created by panasyuk on 31.10.2015.
@@ -10,5 +11,8 @@ public class Start {
 //        Shop s = new Shop("clear");
 
 
+        //DataSource.getInstance().getConnections();
+
     }
+
 }
