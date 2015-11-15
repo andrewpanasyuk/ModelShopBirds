@@ -7,11 +7,8 @@ import shop.Shop;
 public class Start {
     public static void main(String[] args) {
         ShopPanel shopPanel = new ShopPanel();
-//        Shop s = new Shop("creat");
 //        Shop s = new Shop("clear");
 
-
-        //DataSource.getInstance().getConnections();
 
     }
 
